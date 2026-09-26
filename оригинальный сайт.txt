@@ -1,0 +1,1256 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Расписание НГУЭУ">
+    <meta name="author" content="Pyatnitsev Danil">
+	<meta name="verify-reformal" content="ab2e8f486e7ac85d3ea6429e" />
+	<meta name='yandex-verification' content='5a4bdf2d76155aaf' />
+	<link rel="shortcut icon" href="/img/favicon.ico">
+	<meta property="og:title" content="Расписание НГУЭУ" />
+	<meta property="og:image" content="https://rasps.nsuem.ru/img/logo.png"/>
+	<meta property="og:description" content="Расписание Новосибирского Государственного Университета Экономики и Управления" />
+
+
+    <title>Расписание НГУЭУ</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://rasps.nsuem.ru/css/bootstrap.min.css?uniqecall=20260901015632" rel="stylesheet" id="bootstrap-core">
+	<link href="https://rasps.nsuem.ru/css/bootstrap-social.css?uniqecall=20260901015632" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="https://rasps.nsuem.ru/starter-template.css?uniqecall=20260901015632" rel="stylesheet">
+      <style>
+          .container .text-muted {
+               margin:auto;
+               padding:inherit;
+          }
+      </style>
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://rasps.nsuem.ru/js/html5shiv.min.js?uniqecall=20260901015632"></script>
+	  <script src="https://rasps.nsuem.ru/js/respond.min.js?uniqecall=20260901015632"></script>
+    <![endif]-->
+    <script src="https://rasps.nsuem.ru/js/jquery-1.9.0.js?uniqecall=20260901015632"></script>
+	<script src="https://rasps.nsuem.ru/js/jquery.cookie.js?uniqecall=20260901015632"></script>
+	<script src="https://rasps.nsuem.ru/js/bootstrap.min.js?uniqecall=20260901015632"></script>
+	<script src="https://rasps.nsuem.ru/js/typeahead.bundle.js?uniqecall=20260901015632"></script>
+	<script src="https://rasps.nsuem.ru/js/handlebars-v1.3.0.js?uniqecall=20260901015632"></script>
+	<script src="https://rasps.nsuem.ru/js/jquery.floatThead.min.js?uniqecall=20260901015632"></script>
+	<script src="https://rasps.nsuem.ru/js/ui.js?uniqecall=20260901015632"></script>
+  </head>
+
+  <body>
+	<style>
+		* {
+ font-size: 101%;
+}
+        .container {
+            padding-left: unset!important;
+            padding-right: unset!important;
+        }
+	</style>
+		<script>
+
+	function isTouchDevice(){
+    return true == ("ontouchstart" in window || window.DocumentTouch && document instanceof DocumentTouch);
+}
+
+$( document ).ready(function()
+{
+	$("#search_field").keyup(function(event) {
+		var c= String.fromCharCode(event.keyCode);
+		var isWordCharacter = c.match(/\w/);
+		var isBackspaceOrDelete = (event.keyCode == 8 || event.keyCode == 46);
+		if((isWordCharacter || isBackspaceOrDelete) && event.keyCode !=65)
+		{
+
+			$('input.typeahead').typeahead('val', regChange($(this).val()));
+		}
+
+	});
+	switch (getTheme())
+	{
+		case 'simplex':
+			$('#bootstrap-core').attr('href', 'https://rasps.nsuem.ru/css/simxlex_bootstrap.min.css');
+			break;
+		case 'cyborg':
+			$('#bootstrap-core').attr('href', 'https://rasps.nsuem.ru/css/cyborg_bootstrap.min.css');
+			break;
+		case 'lumen':
+			$('#bootstrap-core').attr('href', 'https://rasps.nsuem.ru/css/lumen_bootstrap.min.css');
+			break;
+		case 'default':
+			$('#bootstrap-core').attr('href', 'https://rasps.nsuem.ru/css/bootstrap.min.css');
+			break;
+	}
+	<!-- Reformal -->
+
+
+	var stud_group = new Bloodhound({
+	datumTokenizer: Bloodhound.tokenizers.obj.whitespace('GroupName'),
+	queryTokenizer: Bloodhound.tokenizers.whitespace,
+	limit: 5,
+	prefetch: {
+		ttl: 1,
+		url: '/data/groups',
+		filter: function (response)
+		{
+			return response.data;
+		}
+	}
+});
+var teachers = new Bloodhound({
+	datumTokenizer: Bloodhound.tokenizers.obj.whitespace('TeacherName'),
+	queryTokenizer: Bloodhound.tokenizers.whitespace,
+	limit: 6,
+	prefetch: {
+		ttl: 1,
+		url: '/data/teachers',
+		filter: function (response)
+		{
+			return response.data;
+		}
+	}
+});
+
+var rooms = new Bloodhound({
+	datumTokenizer: Bloodhound.tokenizers.obj.whitespace('RoomName'),
+	queryTokenizer: Bloodhound.tokenizers.whitespace,
+	limit: 5,
+	prefetch: {
+		ttl: 1,
+		url: '/data/rooms',
+		filter: function (response)
+		{
+			return response.data;
+		}
+	}
+});
+
+
+stud_group.initialize();
+teachers.initialize();
+rooms.initialize();
+
+
+
+$('input.typeahead').typeahead({
+  highlight: true
+},
+{
+  name: 'stud_group',
+  displayKey: 'GroupName',
+  source: stud_group.ttAdapter(),
+  templates: {
+    header: '<h4 class="league-name">Группы</h4>',
+	suggestion: Handlebars.compile('<p>{{GroupName}} ({{FacultyName}})</p>')
+  }
+},
+{
+  name: 'teachers',
+  displayKey: 'TeacherName',
+  source: teachers.ttAdapter(),
+  templates: {
+    header: '<h4 class="league-name">Преподаватели</h4>'
+  }
+},
+{
+  name: 'rooms',
+  displayKey: 'RoomName',
+  source: rooms.ttAdapter(),
+  templates: {
+    header: '<h4 class="league-name">Аудитории</h4>'
+  }
+}).on('typeahead:selected', function(obj, datum, name){
+	 var url = window.location.href
+	 var arr = url.split("/");
+
+	 if (name == 'stud_group')
+	 {
+		window.location.href = arr[0] + "//" +document.domain+'/group/'+datum['GroupName'];
+	 } else if (name == 'teachers')
+	 {
+		window.location.href = arr[0] + "//" +document.domain+'/teacher/'+datum['TeacherName'];
+	 }
+	 else if (name == 'rooms')
+	 {
+		window.location.href = arr[0] + "//" +document.domain+'/room/'+datum['RoomName'];
+	 }
+   });
+
+   //--
+
+   $('#default-theme').click(function (){
+		$('#bootstrap-core').attr('href', 'https://rasps.nsuem.ru/css/bootstrap.min.css');
+		saveTheme('default')
+   });
+   $('#simplex-theme').click(function (){
+		$('#bootstrap-core').attr('href', 'https://rasps.nsuem.ru/css/simxlex_bootstrap.min.css');
+		saveTheme('simplex');
+
+   });
+   $('#cyborg-theme').click(function (){
+		$('#bootstrap-core').attr('href', 'https://rasps.nsuem.ru/css/cyborg_bootstrap.min.css');
+		saveTheme('cyborg');
+
+   });
+   $('#lumen-theme').click(function (){
+		$('#bootstrap-core').attr('href', 'https://rasps.nsuem.ru/css/lumen_bootstrap.min.css');
+		saveTheme('lumen');
+
+   });
+
+
+	});
+$('.typeahead.input-sm').siblings('input.tt-hint').addClass('hint-small');
+$('.typeahead.input-lg').siblings('input.tt-hint').addClass('hint-large');
+
+
+
+
+
+
+function adaptiveOff()
+{
+	if (getResponsable() == 'off')
+	{
+		setResponsable('on');
+	}
+	else
+	{
+		setResponsable('off');
+	}
+	window.location.reload();
+}
+
+	</script>
+    <script type="text/javascript">
+
+        var width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+        var height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+
+        var width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+        var height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+
+        function scaleFont (updown) {
+            var defSize = 12;
+            var size = parseInt(elTag('body').style.fontSize || defSize);
+            //if (updown == 1) {
+            //	size++;
+            //} else {
+            //	size--;
+            //}
+            switch (updown){
+                case 1:
+                    size = defSize;
+                    break;
+                case 2:
+                    size = defSize * 1.5;
+                    break;
+                case 3:
+                    size = (defSize * 1.5) * 1.5;
+                    break;
+            }
+            setFont(size);
+            //editTag('div', false, function(el) { el.style.fontSize = size + 'px'; });
+
+            elId('panel_size').style.top = -20 + height - parseInt(elId('panel_size').offsetHeight) + 'px';
+            //elId('panel_size').style.left = -20 + width - parseInt(elId('panel_size').offsetWidth) + 'px';
+            localStorage.setItem('fontSize', size);
+            return size;
+        }
+        
+        function scaleInterval(val) {
+            if (val === 1) {
+                $('*').css('letter-spacing', 'unset');
+            } else if (val === 2) {
+                $('*').css('letter-spacing', '2px');
+            } else if (val === 3) {
+                $('*').css('letter-spacing', '5px');
+            }
+        }
+
+        function setFont (size) {
+            size = parseInt(size);
+            elTag('body').style.fontSize = size + 'px';
+            editTag('div', false, function(el) { el.style.fontSize = size + 'px'; });
+
+            editTag('span', false, function(el) {
+                el.style.fontSize = size + 'px';
+                if (el.parentNode.id == 'brand')
+                    el.style.fontSize = (size + 6) + 'px';
+            });
+
+            editTag('ul', false, function(el) { el.style.fontSize = size + 'px'; });
+            editTag('li', false, function(el) { el.style.fontSize = size + 'px'; });
+            editTag('footer', false, function(el) { el.style.fontSize = size + 'px'; });
+            editTag('table', false, function(el) { el.style.fontSize = size + 'px'; });
+            editTag('tr', false, function(el) { el.style.fontSize = size + 'px'; });
+            editTag('td', false, function(el) { el.style.fontSize = size + 'px'; });
+            editTag('h3', false, function(el) { el.style.fontSize = (size + 5) + 'px'; });
+            editTag('h1', false, function(el) { el.style.fontSize = (size + 10) + 'px'; });
+            editTag('h5', false, function(el) { el.style.fontSize = (size + 3) + 'px'; });
+            editTag('a', false, function(el) { el.style.fontSize = size + 'px'; });
+
+            elId('brand').style.fontSize = (size + 6) + 'px';
+            //editTag('div', false, function(el) { el.style.fontSize = size + 'px'; });
+            elId('panel_size').style.top = -20 + height - parseInt(elId('panel_size').offsetHeight) + 'px';
+            //elId('panel_size').style.left = -20 + width - parseInt(elId('panel_size').offsetWidth) + 'px';
+        }
+        
+        
+
+        function setTheme (num) {
+            var set = function (back, text) {
+                elTag('body').style.background = back;
+                elTag('body').style.color = text;
+                editTag('div', false, function(el) {
+                    el.style.background = back;
+                    el.style.backgroundColor = back;
+                    el.style.color = text;
+                });
+                editTag('nav', false, function(el) { el.style.backgroundColor = back; el.style.color = text; });
+                editTag('ul', false, function(el) { el.style.backgroundColor = back; el.style.color = text; });
+                editTag('li', false, function(el) { el.style.backgroundColor = back; el.style.color = text; });
+
+                editTag('span', false, function(el) {
+                    el.style.backgroundColor = back;
+                    el.style.color = text;
+                });
+
+                editTag('footer', false, function(el) { el.style.backgroundColor = back; el.style.color = text; });
+                editTag('table', false, function(el) { el.style.backgroundColor = back; el.style.color = text; });
+                editTag('tr', false, function(el) { el.style.backgroundColor = back; el.style.color = text; });
+                editTag('td', false, function(el) { el.style.backgroundColor = back; el.style.color = text; });
+                editTag('aside', false, function(el) { el.style.backgroundColor = back; el.style.color = text; });
+                editTag('p', false, function(el) { el.style.backgroundColor = back; el.style.color = text; });
+
+                editTag('h3', false, function(el) {
+                    el.style.cssText = 'font-weight: bold; color: '+text+' !important; background-color: '+back+' !important;';
+                });
+
+                editTag('h1', false, function(el) {
+                    el.style.cssText = 'font-weight: bold; color: '+text+' !important; background-color: '+back+' !important;';
+                });
+
+                editTag('h5', false, function(el) {
+                    el.style.cssText = 'font-weight: bold; color: '+text+' !important; background-color: '+back+' !important;';
+                });
+
+                localStorage.setItem('theme', num);
+            };
+
+            if (num == 1) {
+                set('white', 'black');
+                editTag('a', false, function(el) { el.style.backgroundColor = 'none'; el.style.color = 'blue'; });
+            }
+            else if (num == 2) {
+                set('black', 'white');
+                editTag('a', false, function(el) { el.style.backgroundColor = 'none'; el.style.color = '#C5E0FF'; });
+            }
+            else if (num == 3) {
+                set('#9dd1ff', 'black');
+                editTag('a', false, function(el) { el.style.backgroundColor = 'none'; el.style.color = 'blue'; });
+            }
+        }
+
+        function get_cookie (cookie_name) {
+            var results = document.cookie.match('(^|;) ?' + cookie_name + '=([^;]*)(;|$)');
+            if (results) return (unescape(results[2]));
+            else return null;
+        }
+
+        function closeImg () {
+            var i, list = document.getElementsByTagName('img');
+            for (i = 0; i < list.length; i++) {
+                var el = list[i];
+                el.style.display = 'none';
+                if (el.parentNode.innerHTML && el.alt) {
+                    el.parentNode.innerHTML += '<b style="border: 1px solid; width: ' + el.width + 'px; height:' + el.height + 'px; display: block; text-align: center;">' + el.alt + '</b>';
+                }
+                //el.style.opacity = '0.2';
+            }
+        }
+
+        function editTag (aTag, aClass, func) {
+            var i, list = document.getElementsByTagName(aTag);
+            for (i = 0; i < list.length; i++) {
+                var el = list[i];
+                if (el.className == aClass || !aClass) {
+                    if (func) {
+                        func(el);
+                    } else {
+                        el.style.display = 'none';
+                        el.className = '';
+                    }
+                }
+            }
+        }
+
+        function elId (id) {
+            var o = document.getElementById(id);
+            return o ? o : { style : {}};
+        }
+
+        function elTag (id) {
+            return document.getElementsByTagName(id)[0];
+        }
+
+        var vMode = parseInt(get_cookie('visionMode'));
+
+        function optimized () {
+            closeImg();
+
+            document.body.style.color = 'black';
+            document.body.style.background = 'white';
+
+            editTag('div', false, function(el) {
+                el.style.background = 'none';
+                el.style.backgroundColor = 'none';
+                el.style.color = 'black';
+                el.style.padding = '5px';
+
+                if (el.style.border != '') {
+                    el.style.border = '1px solid #BABABA';
+                }
+
+            });
+
+            editTag('div', 'navbar-header');
+            editTag('div', 'col-md-14');
+
+            editTag('header', '', function(el) {
+                el.style.marginBottom = '50px';
+            });
+
+            editTag('table', false, function(el) {
+                el.style.backgroundColor = 'none';
+            });
+
+            editTag('form', false, function(el) {
+                el.style.backgroundColor = 'none';
+            });
+
+            editTag('aside', false, function(el) {
+                el.style.backgroundColor = 'none';
+            });
+
+            editTag('ul', 'dropdown-menu', function(el) {
+                el.style.background = 'none';
+                el.style.backgroundColor = 'white';
+                //el.style.border = '1px solid black';
+                el.style.color = 'black';
+                el.style.padding = '5px';
+            });
+
+            editTag('li', '', function(el) {
+                el.style.background = 'none';
+                el.style.backgroundColor = 'white';
+                el.style.height = 'auto';
+                el.style.marginBottom = '10px';
+                //el.style.border = '1px solid black';
+                el.style.color = 'black';
+            });
+
+            editTag('a', false, function(el) {
+                el.style.color = '#1414AE';
+                el.style.fontWeight = 'bold';
+                el.style.background = 'none';
+                el.style.backgroundColor = 'none';
+            });
+
+            editTag('a', 'col-xs-12 col-md-6', function(el) {
+                el.style.color = 'black';
+                el.style.backgroundColor = 'none';
+                el.style.border = '1px solid #BABABA';
+            });
+
+            editTag('section', 'col-md-24 col-xs-24', function(el) {
+                el.style.padding = '20px';
+            });
+
+            editTag('a', 'col-xs-24 col-md-8 cube-link', function(el) {
+                el.style.color = 'black';
+                el.style.backgroundColor = 'none';
+                el.style.border = '1px solid #BABABA';
+                el.style.paddingTop = '40px';
+                el.style.paddingBottom = '40px';
+                el.style.display = 'block';
+                el.style.width = '98%';
+                el.style.height = 'auto';
+                el.style.marginBottom = '10px';
+            });
+
+            editTag('a', 'col-md-6 col-xs-12', function(el) {
+                el.style.color = 'black';
+                el.style.backgroundColor = 'none';
+                el.style.border = '1px solid #BABABA';
+            });
+
+            editTag('section', 'col-md-24 col-xs-24', function(el) {
+                el.style.border = '1px solid #BABABA';
+            });
+
+            editTag('div', 'slider-container');
+            editTag('div', 'mainbody hidden-xs');
+            editTag('div', 'mainbody');
+            editTag('div', 'pull-right hidden-sm hidden-xs');
+
+            //elId('main-menu').style.marginTop = '50px';
+            elId('footer').style.background = 'white';
+            elId('footer').style.lineHeight = '20px';
+            elId('header').style.background = 'white';
+            elId('brand').style.fontWeight = 'bold';
+            elId('navbar-collapse').style.border = '1px solid #BABABA';
+
+            if (elId('blink'))
+                elId('blink').id = Date.now();
+
+            editTag('div', 'cube', function (el) {
+                el.style.height = 'auto';
+                el.style.boxShadow = 'none';
+                el.style.mozBoxShadow = 'none';
+                el.style.webkitBoxShadow = 'none';
+                //el.style.display = 'none';
+            });
+
+            editTag('div', 'col-md-8 cube-news', function (el) {
+                el.style.display = 'block';
+                el.style.width = '98%';
+                el.style.marginBottom = '40px';
+                el.style.border = '1px solid';
+            });
+
+            editTag('h3', false, function (el) {
+                el.style.fontWeight = 'bold';
+            });
+
+            editTag('h1', false, function (el) {
+                el.style.fontWeight = 'bold';
+            });
+
+            editTag('h5', false, function (el) {
+                el.style.fontWeight = 'bold';
+            });
+
+            editTag('span', false, function (el) {
+                el.style.color = 'black';
+                el.style.height = 'auto';
+                el.style.marginBottom = '5px';
+            });
+
+            elId('vModeFull').style.display = '';
+
+            var p = document.createElement('div');
+            p.style.display = 'block';
+            p.style.minWidth = '300px';
+            p.style.border = '1px solid';
+            p.style.position = 'fixed';
+            p.style.top = '10px';
+            p.style.left = '10px';
+            p.style.backgroundColor = 'white';
+            p.style.textAlign = 'center';
+            p.style.zIndex = 1000;
+            p.style.padding = '5px';
+// <b style="cursor: pointer; border: 1px solid; padding: 1px 5px 1px 5px; margin: 5px;" onclick="scaleFont();">-A</b>
+// <b style="cursor: pointer; border: 1px solid; padding: 1px 5px 1px 5px; margin: 5px;" onclick="scaleFont(1);">A+</b>
+            p.innerHTML = '\
+                    <b style="cursor: pointer; border: 1px solid; padding: 1px 5px 1px 5px; margin: 5px; font-size: 12pt;" onclick="scaleFont(1);">A</b>\
+                    <b style="cursor: pointer; border: 1px solid; padding: 1px 5px 1px 5px; margin: 5px; font-size: 16pt;" onclick="scaleFont(2);">A</b>\
+                    <b style="cursor: pointer; border: 1px solid; padding: 1px 5px 1px 5px; margin: 5px; font-size: 20pt;" onclick="scaleFont(3);">A</b>\
+                    <b style="cursor: pointer; border: 1px solid; padding: 1px 5px 1px 5px; margin: 5px;" onclick="setTheme(2);">Черный</b>\
+                    <b style="cursor: pointer; border: 1px solid; padding: 1px 5px 1px 5px; margin: 5px;" onclick="setTheme(1);">Белый</b>\
+                    <b style="cursor: pointer; border: 1px solid; padding: 1px 5px 1px 5px; margin: 5px;" onclick="setTheme(3);">Синий</b>\
+                    ';
+            p.id = 'panel_size';
+
+            p.onselectstart = function () {
+                return false;
+            };
+
+            elTag('body').appendChild(p);
+            setFont(localStorage.getItem('fontSize') || 13);
+            setTheme(localStorage.getItem('theme') || 1);
+
+
+
+        }
+
+        if (width < 990 && vMode != 2)
+            elId('mobileVisualModeButton').style.display = '';
+
+        if (vMode == 2) {
+            optimized();
+        }
+
+    </script>
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div id="js-box-logical-class" class="box-logical-class hide">
+            <div id="panel_size" style="display: block; min-width: 300px; border: 1px solid; top: 899px; left: 10px; background: white; text-align: center; z-index: 1000; padding: 5px; font-size: 13px; color: black;">
+                <b style="cursor: pointer; border: 1px solid; padding: 1px 5px 1px 5px; margin: 5px; font-size: 12pt;"
+                   onclick="scaleFont(1);">A</b> <b
+                        style="cursor: pointer; border: 1px solid; padding: 1px 5px 1px 5px; margin: 5px; font-size: 16pt;"
+                        onclick="scaleFont(2);">A</b> <b
+                        style="cursor: pointer; border: 1px solid; padding: 1px 5px 1px 5px; margin: 5px; font-size: 20pt;"
+                        onclick="scaleFont(3);">A</b>
+
+                <b
+                        style="cursor: pointer; border: 1px solid; padding: 1px 5px 1px 5px; margin: 5px;"
+                        onclick="setTheme(2);">Черный</b> <b
+                        style="cursor: pointer; border: 1px solid; padding: 1px 5px 1px 5px; margin: 5px;"
+                        onclick="setTheme(1);">Белый</b> <b
+                        style="cursor: pointer; border: 1px solid; padding: 1px 5px 1px 5px; margin: 5px;"
+                        onclick="setTheme(3);">Синий</b>
+
+                <div style="padding-top: 20px;">
+                    <span style="font-size: 20px">Кернинг</span>
+                    <strong onclick="scaleInterval(1)" style="cursor: pointer; border: 1px solid; padding: 1px 5px 1px 5px; margin: 5px; font-size: 12pt;">Стандартный</strong>&nbsp;
+                    <strong onclick="scaleInterval(2)" style="cursor: pointer; border: 1px solid; padding: 1px 5px 1px 5px; margin: 5px; font-size: 12pt;">Средний</strong>&nbsp;
+                    <strong onclick="scaleInterval(3)"style="cursor: pointer; border: 1px solid; padding: 1px 5px 1px 5px; margin: 5px; font-size: 12pt;">Большой</strong>
+                </div>
+            </div> 
+        </div>
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only" >Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/group" onclick="selectGroup();">Расписание НГУЭУ</a>
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+              <li id="teacher"><a href="/teacher" onclick="selectTeacher();">Преподаватели</a></li>
+              <li id="room"><a href="/room" onclick="selectRoom();">Аудитории</a></li>
+              <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Графики<b class="caret"></b></a>
+                  <ul class="dropdown-menu action_menu">
+                      <li id="gup"><a href="javascript:void(0);" onclick="showOuterData('gup');">График учебного процесса</a></li>
+                      <li>
+                          <a href="https://tables.nsuem.ru/dtable/view-external-links/f98ff8c6316a4148a613/" target="_blank">График пересдач</a>
+                      </li>
+                      <li>
+                          <a href="https://vk.cc/9OzFb1" target="_blank">Сроки проведения пересдач</a>
+                      </li>
+                      <li>
+                          <a href="javascript:void(0)" onclick="showOuterData('consultation')">График консультаций</a>
+                      </li>
+
+                  </ul>
+              </li>
+            <li id="group" class="active"><a href="/group" onclick="selectGroup();"> Группы</a></li>
+			<li id="chair"><a href="/chair" onclick="selectChair();">Кафедры</a></li>
+            <li id="rings"><a href="/rings" onclick="selectRings();">Звонки</a></li>
+            <li id="gup"><a href="javascript:void(0);" onclick="showOuterData('changes');">Замены</a></li>
+            <li id="gia"><a href="javascript:void(0);" onclick="showOuterData('gia');">ГИА</a></li>
+            <li><a href="#" id="js-btn-logical-class"><i class="fa fa-eye"></i></a></li>
+		  </ul>
+		  <ul class="nav navbar-nav navbar-right">
+			<li class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown">Дополнительно<b class="caret"></b></a>
+					<ul class="dropdown-menu action_menu">
+					    <li id="print"><a href="javascript:void();" onclick="print();">Печать</a></li>
+					</ul>
+			  </li>
+			</ul>
+		</div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+	<!-- modal -->
+
+	<div class="modal fade" id="color-modal" tabindex="-1" role="dialog" aria-labelledby="color-modal-Label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="color-modal-Label">Цветовые схемы</h4>
+      </div>
+      <div class="modal-body">
+        <ul>
+			<li><a id="default-theme" href="javascript:void();">Тема по-умолчанию</a></li>
+			<li><a id="simplex-theme" href="javascript:void();">Simplex</a></li>
+			<li><a id="cyborg-theme" href="javascript:void();">Cyborg</a></li>
+			<li><a id="lumen-theme" href="javascript:void();">Lumen</a></li>
+		</ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+	<!-- end modal -->
+
+    <div class="container" style="margin-top:-2%;">
+
+      <div class=" hidden-print" style="margin-bottom:10px;">
+			<input type="text" class="form-control typeahead" data-provide="typeahead" placeholder="Поиск по группам, преподавателям и аудиториям" id="search_field">
+      </div>
+	  <noscript><h1 style="text-align:center;">Для работы сайта требуется включенный JavaScript</h1></noscript>
+
+	  <script>
+    $(document).ready(function () {
+        selectGroup();
+        document.title = 'НГУЭУ: Расписание для группы 9-ИС403 Подгруппа 1';
+        $("meta[property='og\\:description']").attr("content", 'НГУЭУ: Расписание для группы 9-ИС403 Подгруппа 1');
+        $('.action_menu').append('<li><a href="javascript:void(0)" id="ShowTeachers">Показать преподавателей</a></li>');
+        $('.action_menu').append('<li><a href="javascript:void(0)" id="ShortSubjects">Показать сокращенные предметы</a></li>');
+        $('.action_menu').append('<li><a href="javascript:void(0)" id="showEndTime">Показать время начала и конца пар</a></li>');
+        $('.action_menu').append('<li><a href="javascript:void(0)" id="show-addition-panel">Показать дополнительные возможности</a></li>');
+
+        var hash = window.location.hash.substr(1);
+        showGroupGeniralContent();
+        if ($.cookie("add_panel_on") == 1) {
+            $('#addition-panel').show();
+        }
+        else if ($.cookie("add_panel_on") != null) {
+            $('#addition-panel').hide();
+        }
+
+        if (hash == 'semester') {
+            $('#schedule_switch').find('h4').find('a').html('Показать расписание на сессию'); // label
+            $("#schedule_table_session").hide('slow');
+            $("#schedule_table_och_sem").show('slow');
+            $("#schedule_table_zao_sem").show('slow');
+            $('.js-name-print').text('РАСПИСАНИЕ ЗАНЯТИЙ');
+        }
+        else if (hash == 'session') {
+            $('#schedule_switch').find('h4').find('a').html('Показать расписание на семестр'); // label
+            $("#schedule_table_och_sem").hide('slow');
+            $("#schedule_table_zao_sem").hide('slow');
+            $("#schedule_table_session").show('slow');
+            $('.js-name-print').text('РАСПИСАНИЕ СЕССИИ');
+
+        }
+        else {
+            if ($('#schedule_table_och_sem').length > 0) {
+                $('#schedule_switch').find('h4').find('a').html('Показать расписание на сессию'); // label
+                $("#schedule_table_session").hide('slow');
+                $("#schedule_table_och_sem").show('slow');
+                $('.js-name-print').text('РАСПИСАНИЕ ЗАНЯТИЙ');
+            } else if ($('#schedule_table_zao_sem').length > 0)
+            {
+                $('#schedule_switch').find('h4').find('a').html('Показать расписание на сессию'); // label
+                $("#schedule_table_session").hide('slow');
+                $("#schedule_table_zao_sem").show('slow');
+                $('.js-name-print').text('РАСПИСАНИЕ ЗАНЯТИЙ');
+            }
+            else
+            {
+                $('#schedule_switch').find('h4').find('a').html('Показать расписание на семестр'); // label
+                $("#schedule_table_och_sem").hide('slow');
+                $("#schedule_table_zao_sem").hide('slow');
+                $("#schedule_table_session").show('slow');
+                $('.js-name-print').text('РАСПИСАНИЕ СЕССИИ');
+            }
+
+        }
+
+        $(document).on('click','#ShowTeachers',function () {
+            if ($('.Teacher').is(":visible")) {
+                $('.Teacher').hide('slow');
+                $(this).html('Показать преподавателей');
+            }
+            else {
+                $('.Teacher').show('slow');
+                $(this).html('Скрыть преподавателей');
+            }
+        });
+
+        $(document).on('click','#ShortSubjects',function () {
+            if ($('.ShortScheduleInfo').is(":visible")) {
+                $('.mainScheduleInfo').show('slow');
+                $('.ShortScheduleInfo').hide('slow');
+                $(this).html('Показать сокращенные предметы');
+            }
+            else {
+                $('.ShortScheduleInfo').show('slow');
+                $('.mainScheduleInfo').hide('slow');
+                $(this).html('Показать полные предметы');
+            }
+        });
+
+        $(document).on('click','#showEndTime',function () {
+            if ($(".extend_time").is(":visible")) {
+                $('.time').show('slow');
+                $('.extend_time').hide('slow');
+                $(this).html('Показать время начала и конца пар');
+            }
+            else {
+                $('.extend_time').show('slow');
+                $('.time').hide('slow');
+                $(this).html('Скрыть время конца пар');
+            }
+        });
+        // checkers
+        $(document).on('click','#ShowTeachers-chbx',function () {
+            if (this.checked) {
+                $('.Teacher').show('slow');
+                //mainScheduleInfo
+            }
+            else {
+                $('.Teacher').hide('slow');
+            }
+        });
+        $(document).on('click','#ShortSubjects-chbx',function () {
+            if (this.checked) {
+                $('.mainScheduleInfo').hide('slow');
+                $('.ShortScheduleInfo').show('slow');
+            }
+            else {
+                $('.ShortScheduleInfo').hide('slow');
+                $('.mainScheduleInfo').show('slow');
+            }
+        });
+        $(document).on('click','#showEndTime-chbx',function () {
+            if (this.checked) {
+                $('.time').hide('slow');
+                $('.extend_time').show('slow');
+            }
+            else {
+                $('.extend_time').hide('slow');
+                $('.time').show('slow');
+            }
+        });
+        // hide panel;
+        $(document).on('click','#addition-panel-hide',function () {
+            $('#addition-panel').hide('slow');
+            $('.action_menu').find('#show-addition-panel').closest('li').show();
+            saveAddantionState(0);
+        });
+        // show panel
+        $(document).on('click','#show-addition-panel',function () {
+            $('#addition-panel').show('slow');
+            $('.action_menu').find('#show-addition-panel').closest('li').hide();
+            saveAddantionState(1);
+        });
+
+        // Переходы на страницу
+        if ($('#ShowTeachers').is(':checked')) {
+            $('.Teacher').show();
+        }
+        if ($('#ShortSubjects').is(':checked')) {
+            $('.mainScheduleInfo').hide('slow');
+            $('.ShortScheduleInfo').show();
+        }
+        if ($('#showEndTime').is(':checked')) {
+            $('.time').hide('slow');
+            $('.extend_time').show();
+        }
+
+        if ($('#addition-panel').is(':visible')) {
+            $('.action_menu').find('#show-addition-panel').closest('li').hide();
+        }
+
+    });
+
+</script>
+<div id="group_geniral_content" style="display:none;">
+    <div class="header">
+        <div class="btn-group btn-group-justified hidden-print" style="margin-bottom:1%">
+            <a href="/group/9-ИС403/1" class="btn btn-primary btn-xs">1</a><a href="/group/9-ИС403/2" class="btn btn-primary btn-xs">2</a><a href="/group/9-ИС403/3" class="btn btn-primary btn-xs">3</a>        </div>
+                    <div class="panel panel-primary hidden-print" id="addition-panel">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Дополнительные возможности</h3>
+
+                </div>
+                <div class="panel-body">
+                    <form class="form-horizontal">
+                        <fieldset>
+                            <table style="margin: auto; text-align:left;">
+                                <tr>
+                                    <td><input type="checkbox" id="ShowTeachers-chbx"> Показать преподавателей</td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" id="ShortSubjects-chbx"> Сокращенные предметы</td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" id="showEndTime-chbx"> Отображать время начала и конца
+                                        пар
+                                    </td>
+                                </tr>
+                            </table>
+                        </fieldset>
+                    </form>
+                    <br/>
+                    <span><a href="#" id="addition-panel-hide">Скрыть дополнительные возможности</a></span>
+                </div>
+            </div>
+            <h3 class="grouplabel hidden-print">[<a href="/group#FCT">ФЦТ</a>] 9-ИС403.1</h3><div style='text-align: right' class='visible-print'><br><br>УТВЕРЖДАЮ <br>
+Проректор по учебной работе <br>
+_____________Т.И. Громогласова <br>
+____ ______________20____<br></div><strong class='visible-print js-name-print'>РАСПИСАНИЕ ЗАНЯТИЙ</strong><strong class='visible-print'>Группа 9-ИС403</strong><strong class='visible-print'>3-й курс Очная форма обучения (1 Семестр)</strong><div id="schedule_switch"><h4 class="hidden-print"><a href="javascript:void(0);" onclick="showAnotherSchedule();">Показать расписание для сессии</a></h4></div><br /><script>
+    $(document).ready(function () {
+        var date = new Date();
+        var current_day = date.getDay() - 1;
+        var current_hour = date.getHours();
+        if (current_hour < 10)
+            current_hour = "0" + current_hour;
+        var current_minute = date.getMinutes();
+        if (current_minute < 10)
+            current_minute = "0" + current_minute;
+
+        var current_time = '01_56';
+
+        //alert(current_time);
+        $("#day_" + current_day).removeClass('info').addClass('danger');
+        var times = [];
+                times[times.length] = ['8_00', '09_30'];
+                times[times.length] = ['9_40', '11_10'];
+                times[times.length] = ['11_25', '12_55'];
+                times[times.length] = ['13_20', '14_50'];
+                times[times.length] = ['15_05', '16_35'];
+                times[times.length] = ['16_50', '18_20'];
+                times[times.length] = ['18_30', '20_00'];
+                times[times.length] = ['20_05', '21_35'];
+                for (i = 0; i < times.length; i++) {//alert(parseInt(current_time.replace('_', '')));
+            if (parseInt(current_time.replace('_', '')) >= parseInt(times[i][0].replace('_', '')) && parseInt(current_time.replace('_', '')) <= parseInt(times[i][1].replace('_', '')))
+                $("#time_" + times[i][0] + "_day_" + current_day).removeClass('info').addClass('danger');
+        }
+        //alert(current_day);
+        //if (current_time > )
+        //$("#time_11_25_day_0").removeClass('info').addClass('danger');
+    });
+</script>
+
+<div id="schedule_table_och_sem">
+
+    
+<div class="schedule_table" style="width:100%">
+				<table class="table table-hover table-bordered table-condensed" style="width:auto; margin:auto;">
+					<thead>
+					<tr class="info centered">
+						<td><strong>День</strong></td>
+						<td><strong>Время</strong></td><td align="center" class="danger" id='blink'><strong>Первая неделя</strong></td>
+								<td align="center"><strong>Вторая неделя</strong></td></tr>
+					</thead><tbody style="text-align:left;"><tr></tr><tr><td id="day_0" class="info centered day-header" style='border-top:3px solid #c4e3f3'>пн</td><td class="info centered" id="time_13_20_day_0" style='border-top:3px solid #c4e3f3'><div class="time" title=" Заканчивается в 14:50">13:20</div><div class="extend_time" style="display:none;">13:20--14:50</div></td><td style='border-top:3px solid #c4e3f3'>&nbsp;</td><td style='border-top:3px solid #c4e3f3'><div class="mainScheduleInfo">МДК.02.02 Инстр.ср.разр.прогр.обесп, <a  href="https://rasps.nsuem.ru/room/2-305">2-305</a> 
+                    <div class='small text-muted'>Лекция</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">МДК.02.02, <a  href="https://rasps.nsuem.ru/room/2-305">2-305</a> 
+					<div class='small text-muted'>Лекция</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Синько А.Е.">Синько А.Е.</a></div></td></td></tr><tr><td style=''>&nbsp;</td><td class="info centered" id="time_15_05_day_0" style=''><div class="time" title=" Заканчивается в 16:35">15:05</div><div class="extend_time" style="display:none;">15:05--16:35</div></td><td style=''>
+                    <div class='mainScheduleInfo'>Физическая культура, <a href="https://rasps.nsuem.ru/room/неизв.">неизв.</a> 3-Сп.зал
+                    <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class='ShortScheduleInfo' style="display:none;">Физкульт, <a  href="https://rasps.nsuem.ru/room/неизв.">неизв.</a> 3-Сп.зал
+					<div class='small text-muted'>Семинар</div> 
+					</div>
+					<div class='Teacher' style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Приходько А.Ю.">Приходько А.Ю.</a></div>
+					</td><td style=''>
+                    <div class="mainScheduleInfo">МДК.02.02 Инстр.ср.разр.прогр.обесп, <a  href="https://rasps.nsuem.ru/room/2-305">2-305</a> 
+                    <div class='small text-muted'>Лекция</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">МДК.02.02, <a  href="https://rasps.nsuem.ru/room/2-305">2-305</a> 
+					<div class='small text-muted'>Лекция</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Синько А.Е.">Синько А.Е.</a></div></td></td></tr><tr><td style=''>&nbsp;</td><td class="info centered" id="time_16_50_day_0" style=''><div class="time" title=" Заканчивается в 18:20">16:50</div><div class="extend_time" style="display:none;">16:50--18:20</div></td><td style=''>
+                    <div class='mainScheduleInfo'>Экономика отрасли, <a href="https://rasps.nsuem.ru/room/3-215">3-215</a> 
+                    <div class='small text-muted'>Лекция</div>
+                    </div>
+					<div class='ShortScheduleInfo' style="display:none;">Эк.отрасли, <a  href="https://rasps.nsuem.ru/room/3-215">3-215</a> 
+					<div class='small text-muted'>Лекция</div> 
+					</div>
+					<div class='Teacher' style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Высоцкая Г.В.">Высоцкая Г.В.</a></div>
+					</td><td style=''>
+                    <div class="mainScheduleInfo">Экономика отрасли, <a  href="https://rasps.nsuem.ru/room/3-215">3-215</a> 
+                    <div class='small text-muted'>Лекция</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">Эк.отрасли, <a  href="https://rasps.nsuem.ru/room/3-215">3-215</a> 
+					<div class='small text-muted'>Лекция</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Высоцкая Г.В.">Высоцкая Г.В.</a></div></td></td></tr><tr><td style=''>&nbsp;</td><td class="info centered" id="time_18_30_day_0" style=''><div class="time" title=" Заканчивается в 20:00">18:30</div><div class="extend_time" style="display:none;">18:30--20:00</div></td><td style=''>&nbsp;</td><td style=''><div class="mainScheduleInfo">Физическая культура, <a  href="https://rasps.nsuem.ru/room/неизв.">неизв.</a> 3-Сп.зал
+                    <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">Физкульт, <a  href="https://rasps.nsuem.ru/room/неизв.">неизв.</a> 3-Сп.зал
+					<div class='small text-muted'>Семинар</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Приходько А.Ю.">Приходько А.Ю.</a></div></td></td></tr><tr></tr><tr><td id="day_1" class="info centered day-header" style='border-top:3px solid #c4e3f3'>вт</td><td class="info centered" id="time_11_25_day_1" style='border-top:3px solid #c4e3f3'><div class="time" title=" Заканчивается в 12:55">11:25</div><div class="extend_time" style="display:none;">11:25--12:55</div></td><td style='border-top:3px solid #c4e3f3'><div class="mainScheduleInfo">МДК.02.02 Инстр.ср.разр.прогр.обесп, <a  href="https://rasps.nsuem.ru/room/2-300">2-300</a> 
+                        <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">МДК.02.02, <a  href="https://rasps.nsuem.ru/room/2-300">2-300</a> 
+					<div class='small text-muted'>Семинар</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Синько А.Е.">Синько А.Е.</a></div></td><td  style='border-top:3px solid #c4e3f3'>&nbsp;</td></tr><tr><td style=''>&nbsp;</td><td class="info centered" id="time_13_20_day_1" style=''><div class="time" title=" Заканчивается в 14:50">13:20</div><div class="extend_time" style="display:none;">13:20--14:50</div></td><td style=''>
+                    <div class='mainScheduleInfo'>МДК.03.02 Управление проектами, <a href="https://rasps.nsuem.ru/room/2-306">2-306</a> 
+                    <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class='ShortScheduleInfo' style="display:none;">МДК.03.02, <a  href="https://rasps.nsuem.ru/room/2-306">2-306</a> 
+					<div class='small text-muted'>Семинар</div> 
+					</div>
+					<div class='Teacher' style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Полухина В.Д.">Полухина В.Д.</a></div>
+					</td><td style=''>
+                    <div class="mainScheduleInfo">Физическая культура, <a  href="https://rasps.nsuem.ru/room/неизв.">неизв.</a> 2-Сп.зал
+                    <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">Физкульт, <a  href="https://rasps.nsuem.ru/room/неизв.">неизв.</a> 2-Сп.зал
+					<div class='small text-muted'>Семинар</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Приходько А.Ю.">Приходько А.Ю.</a></div></td></td></tr><tr><td style=''>&nbsp;</td><td class="info centered" id="time_15_05_day_1" style=''><div class="time" title=" Заканчивается в 16:35">15:05</div><div class="extend_time" style="display:none;">15:05--16:35</div></td><td style=''>
+                    <div class='mainScheduleInfo'>МДК.03.02 Управление проектами, <a href="https://rasps.nsuem.ru/room/2-204">2-204</a> 
+                    <div class='small text-muted'>Лекция</div>
+                    </div>
+					<div class='ShortScheduleInfo' style="display:none;">МДК.03.02, <a  href="https://rasps.nsuem.ru/room/2-204">2-204</a> 
+					<div class='small text-muted'>Лекция</div> 
+					</div>
+					<div class='Teacher' style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Полухина В.Д.">Полухина В.Д.</a></div>
+					</td><td style=''>
+                    <div class="mainScheduleInfo">МДК.02.02 Инстр.ср.разр.прогр.обесп, <a  href="https://rasps.nsuem.ru/room/2-205">2-205</a> 
+                    <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">МДК.02.02, <a  href="https://rasps.nsuem.ru/room/2-205">2-205</a> 
+					<div class='small text-muted'>Семинар</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Синько А.Е.">Синько А.Е.</a></div></td></td></tr><tr><td style=''>&nbsp;</td><td class="info centered" id="time_16_50_day_1" style=''><div class="time" title=" Заканчивается в 18:20">16:50</div><div class="extend_time" style="display:none;">16:50--18:20</div></td><td style=''>
+                    <div class='mainScheduleInfo'>МДК.03.02 Управление проектами, <a href="https://rasps.nsuem.ru/room/2-204">2-204</a> 
+                    <div class='small text-muted'>Лекция</div>
+                    </div>
+					<div class='ShortScheduleInfo' style="display:none;">МДК.03.02, <a  href="https://rasps.nsuem.ru/room/2-204">2-204</a> 
+					<div class='small text-muted'>Лекция</div> 
+					</div>
+					<div class='Teacher' style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Полухина В.Д.">Полухина В.Д.</a></div>
+					</td><td style=''>
+                    <div class="mainScheduleInfo">МДК.02.02 Инстр.ср.разр.прогр.обесп, <a  href="https://rasps.nsuem.ru/room/2-205">2-205</a> 
+                    <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">МДК.02.02, <a  href="https://rasps.nsuem.ru/room/2-205">2-205</a> 
+					<div class='small text-muted'>Семинар</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Синько А.Е.">Синько А.Е.</a></div></td></td></tr><tr></tr><tr><td id="day_2" class="info centered day-header" style='border-top:3px solid #c4e3f3'>ср</td><td class="info centered" id="time_8_00_day_2" style='border-top:3px solid #c4e3f3'><div class="time" title=" Заканчивается в 09:30">8:00</div><div class="extend_time" style="display:none;">8:00--09:30</div></td><td style='border-top:3px solid #c4e3f3'>&nbsp;</td><td style='border-top:3px solid #c4e3f3'><div class="mainScheduleInfo">Иностранный язык в проф.деят., <a  href="https://rasps.nsuem.ru/room/5-504">5-504</a> 
+                    <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">ИЯвПД, <a  href="https://rasps.nsuem.ru/room/5-504">5-504</a> 
+					<div class='small text-muted'>Семинар</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Посухова Е.А.">Посухова Е.А.</a></div></td></td></tr><tr><td style=''>&nbsp;</td><td class="info centered" id="time_9_40_day_2" style=''><div class="time" title=" Заканчивается в 11:10">9:40</div><div class="extend_time" style="display:none;">9:40--11:10</div></td><td style=''>&nbsp;</td><td style=''><div class="mainScheduleInfo">Стандартизация, сертиф. и тех. док, <a  href="https://rasps.nsuem.ru/room/2-306">2-306</a> 
+                    <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">Станд,серт, <a  href="https://rasps.nsuem.ru/room/2-306">2-306</a> 
+					<div class='small text-muted'>Семинар</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Россов Д.А.">Россов Д.А.</a></div></td></td></tr><tr><td style=''>&nbsp;</td><td class="info centered" id="time_11_25_day_2" style=''><div class="time" title=" Заканчивается в 12:55">11:25</div><div class="extend_time" style="display:none;">11:25--12:55</div></td><td style=''>
+                    <div class='mainScheduleInfo'>Иностранный язык в проф.деят., <a href="https://rasps.nsuem.ru/room/2-215">2-215</a> 
+                    <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class='ShortScheduleInfo' style="display:none;">ИЯвПД, <a  href="https://rasps.nsuem.ru/room/2-215">2-215</a> 
+					<div class='small text-muted'>Семинар</div> 
+					</div>
+					<div class='Teacher' style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Посухова Е.А.">Посухова Е.А.</a></div>
+					</td><td style=''>
+                    <div class="mainScheduleInfo">Стандартизация, сертиф. и тех. док, <a  href="https://rasps.nsuem.ru/room/3-206">3-206</a> 
+                    <div class='small text-muted'>Лекция</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">Станд,серт, <a  href="https://rasps.nsuem.ru/room/3-206">3-206</a> 
+					<div class='small text-muted'>Лекция</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Россов Д.А.">Россов Д.А.</a></div></td></td></tr><tr><td style=''>&nbsp;</td><td class="info centered" id="time_13_20_day_2" style=''><div class="time" title=" Заканчивается в 14:50">13:20</div><div class="extend_time" style="display:none;">13:20--14:50</div></td><td style=''><div class="mainScheduleInfo">Стандартизация, сертиф. и тех. док, <a  href="https://rasps.nsuem.ru/room/2-203">2-203</a> 
+                        <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">Станд,серт, <a  href="https://rasps.nsuem.ru/room/2-203">2-203</a> 
+					<div class='small text-muted'>Семинар</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Россов Д.А.">Россов Д.А.</a></div></td><td  style=''>&nbsp;</td></tr><tr><td style=''>&nbsp;</td><td class="info centered" id="time_15_05_day_2" style=''><div class="time" title=" Заканчивается в 16:35">15:05</div><div class="extend_time" style="display:none;">15:05--16:35</div></td><td style=''><div class="mainScheduleInfo">Стандартизация, сертиф. и тех. док, <a  href="https://rasps.nsuem.ru/room/2-300">2-300</a> 
+                        <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">Станд,серт, <a  href="https://rasps.nsuem.ru/room/2-300">2-300</a> 
+					<div class='small text-muted'>Семинар</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Россов Д.А.">Россов Д.А.</a></div></td><td  style=''>&nbsp;</td></tr><tr><td style=''>&nbsp;</td><td class="info centered" id="time_16_50_day_2" style=''><div class="time" title=" Заканчивается в 18:20">16:50</div><div class="extend_time" style="display:none;">16:50--18:20</div></td><td style=''>
+                    <div class='mainScheduleInfo'>Стандартизация, сертиф. и тех. док, <a href="https://rasps.nsuem.ru/room/2-216">2-216</a> 
+                    <div class='small text-muted'>Лекция</div>
+                    </div>
+					<div class='ShortScheduleInfo' style="display:none;">Станд,серт, <a  href="https://rasps.nsuem.ru/room/2-216">2-216</a> 
+					<div class='small text-muted'>Лекция</div> 
+					</div>
+					<div class='Teacher' style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Россов Д.А.">Россов Д.А.</a></div>
+					</td><td style=''>
+                    <div class="mainScheduleInfo">Кураторский час, <a  href="https://rasps.nsuem.ru/room/неизв.">неизв.</a> ID 880 7146 2165, код 7sigtV
+                    <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">Курат.час, <a  href="https://rasps.nsuem.ru/room/неизв.">неизв.</a> ID 880 7146 2165, код 7sigtV
+					<div class='small text-muted'>Семинар</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Шмидт Л.П.">Шмидт Л.П.</a></div></td></td></tr><tr></tr><tr><td id="day_3" class="info centered day-header" style='border-top:3px solid #c4e3f3'>чт</td><td class="info centered" id="time_15_05_day_3" style='border-top:3px solid #c4e3f3'><div class="time" title=" Заканчивается в 16:35">15:05</div><div class="extend_time" style="display:none;">15:05--16:35</div></td><td style='border-top:3px solid #c4e3f3'>&nbsp;</td><td style='border-top:3px solid #c4e3f3'><div class="mainScheduleInfo">МДК.03.02 Управление проектами, <a  href="https://rasps.nsuem.ru/room/5-608">5-608</a> 
+                    <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">МДК.03.02, <a  href="https://rasps.nsuem.ru/room/5-608">5-608</a> 
+					<div class='small text-muted'>Семинар</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Полухина В.Д.">Полухина В.Д.</a></div></td></td></tr><tr><td style=''>&nbsp;</td><td class="info centered" id="time_16_50_day_3" style=''><div class="time" title=" Заканчивается в 18:20">16:50</div><div class="extend_time" style="display:none;">16:50--18:20</div></td><td style=''>
+                    <div class='mainScheduleInfo'>МДК.03.02 Управление проектами, <a href="https://rasps.nsuem.ru/room/2-307">2-307</a> 
+                    <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class='ShortScheduleInfo' style="display:none;">МДК.03.02, <a  href="https://rasps.nsuem.ru/room/2-307">2-307</a> 
+					<div class='small text-muted'>Семинар</div> 
+					</div>
+					<div class='Teacher' style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Полухина В.Д.">Полухина В.Д.</a></div>
+					</td><td style=''>
+                    <div class="mainScheduleInfo">МДК.03.02 Управление проектами, <a  href="https://rasps.nsuem.ru/room/5-506">5-506</a> 
+                    <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">МДК.03.02, <a  href="https://rasps.nsuem.ru/room/5-506">5-506</a> 
+					<div class='small text-muted'>Семинар</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Полухина В.Д.">Полухина В.Д.</a></div></td></td></tr><tr><td style=''>&nbsp;</td><td class="info centered" id="time_18_30_day_3" style=''><div class="time" title=" Заканчивается в 20:00">18:30</div><div class="extend_time" style="display:none;">18:30--20:00</div></td><td style=''>
+                    <div class='mainScheduleInfo'>Экономика отрасли, <a href="https://rasps.nsuem.ru/room/5-620">5-620</a> 
+                    <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class='ShortScheduleInfo' style="display:none;">Эк.отрасли, <a  href="https://rasps.nsuem.ru/room/5-620">5-620</a> 
+					<div class='small text-muted'>Семинар</div> 
+					</div>
+					<div class='Teacher' style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Высоцкая Г.В.">Высоцкая Г.В.</a></div>
+					</td><td style=''>
+                    <div class="mainScheduleInfo">Экономика отрасли, <a  href="https://rasps.nsuem.ru/room/3-300/1">3-300/1</a> 
+                    <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">Эк.отрасли, <a  href="https://rasps.nsuem.ru/room/3-300/1">3-300/1</a> 
+					<div class='small text-muted'>Семинар</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Высоцкая Г.В.">Высоцкая Г.В.</a></div></td></td></tr><tr></tr><tr><td id="day_4" class="info centered day-header" style='border-top:3px solid #c4e3f3'>пт</td><td colspan=3 style="text-align:center; vertical-align:middle; border-top:3px solid #c4e3f3">Выходной</td></tr><tr></tr><tr><td id="day_5" class="info centered day-header" style='border-top:3px solid #c4e3f3'>сб</td><td class="info centered" id="time_9_40_day_5" style='border-top:3px solid #c4e3f3'><div class="time" title=" Заканчивается в 11:10">9:40</div><div class="extend_time" style="display:none;">9:40--11:10</div></td><td style='border-top:3px solid #c4e3f3'><div class="mainScheduleInfo">МДК.02.03 Математическое моделиров., <a  href="https://rasps.nsuem.ru/room/2-305">2-305</a> 
+                        <div class='small text-muted'>Лекция</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">МДК.02.03, <a  href="https://rasps.nsuem.ru/room/2-305">2-305</a> 
+					<div class='small text-muted'>Лекция</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Донгак А.Х.">Донгак А.Х.</a></div></td><td  style='border-top:3px solid #c4e3f3'>&nbsp;</td></tr><tr><td style=''>&nbsp;</td><td class="info centered" id="time_11_25_day_5" style=''><div class="time" title=" Заканчивается в 12:55">11:25</div><div class="extend_time" style="display:none;">11:25--12:55</div></td><td style=''><div class="mainScheduleInfo">МДК.02.03 Математическое моделиров., <a  href="https://rasps.nsuem.ru/room/2-305">2-305</a> 
+                        <div class='small text-muted'>Лекция</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">МДК.02.03, <a  href="https://rasps.nsuem.ru/room/2-305">2-305</a> 
+					<div class='small text-muted'>Лекция</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Донгак А.Х.">Донгак А.Х.</a></div></td><td  style=''>&nbsp;</td></tr><tr><td style=''>&nbsp;</td><td class="info centered" id="time_13_20_day_5" style=''><div class="time" title=" Заканчивается в 14:50">13:20</div><div class="extend_time" style="display:none;">13:20--14:50</div></td><td style=''><div class="mainScheduleInfo">МДК.02.03 Математическое моделиров., <a  href="https://rasps.nsuem.ru/room/2-306">2-306</a> 
+                        <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">МДК.02.03, <a  href="https://rasps.nsuem.ru/room/2-306">2-306</a> 
+					<div class='small text-muted'>Семинар</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Донгак А.Х.">Донгак А.Х.</a></div></td><td  style=''>&nbsp;</td></tr><tr><td style=''>&nbsp;</td><td class="info centered" id="time_15_05_day_5" style=''><div class="time" title=" Заканчивается в 16:35">15:05</div><div class="extend_time" style="display:none;">15:05--16:35</div></td><td style=''><div class="mainScheduleInfo">МДК.02.03 Математическое моделиров., <a  href="https://rasps.nsuem.ru/room/2-306">2-306</a> 
+                        <div class='small text-muted'>Семинар</div>
+                    </div>
+					<div class="ShortScheduleInfo" style="display:none;">МДК.02.03, <a  href="https://rasps.nsuem.ru/room/2-306">2-306</a> 
+					<div class='small text-muted'>Семинар</div>
+					</div>
+					<div class="Teacher" style="display:none;"><a href="https://rasps.nsuem.ru/teacher/Донгак А.Х.">Донгак А.Х.</a></div></td><td  style=''>&nbsp;</td></tr></tr><tbody></table></div></div><div id="schedule_table_session" style="display:none">
+<div class="panel panel-warning" style="margin:2%;">
+					<div class="panel-heading">
+						<h3 class="panel-title">Расписание для сессии не найдено</h3>
+					</div>
+					<div class="panel-body" style="text-align:left;">
+						Не удается найти расписание для сессии для заданной группы
+					</div>
+				</div></div>        <div class="visible-print" style="margin-top: 10px;">
+            Декан факультета ____________&nbsp;
+            Начальник УМУ___________&nbsp;
+            Зав. бюро расписаний_________&nbsp;
+        </div>
+    </div>
+</div>	 <!-- /.container -->
+  <div>
+      <div class="container hidden-print">
+        <p class="text-muted" style="text-align:right; vertical-align:middle;">
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+(function (d, w, c) {
+    (w[c] = w[c] || []).push(function() {
+        try {
+            w.yaCounter25516784 = new Ya.Metrika({id:25516784,
+                    webvisor:true,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true});
+        } catch(e) { }
+    });
+
+    var n = d.getElementsByTagName("script")[0],
+        s = d.createElement("script"),
+        f = function () { n.parentNode.insertBefore(s, n); };
+    s.type = "text/javascript";
+    s.async = true;
+    s.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//mc.yandex.ru/metrika/watch.js";
+
+    if (w.opera == "[object Opera]") {
+        d.addEventListener("DOMContentLoaded", f, false);
+    } else { f(); }
+})(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="//mc.yandex.ru/watch/25516784" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-26924943-3', 'auto');
+  ga('send', 'pageview');
+
+</script>
+		</p>
+      </div>
+    </div>
+		<div class="visible-xs visible-sm hidden-print" style="text-align:center; padding:10px; font-size:80%">
+			<a href="javascript:void(0);" onclick="adaptiveOff();">Включить \ отключить адаптивный дизайн</a>
+		</div>
+    </div>
+
+
+	<div class="footer hidden-print">
+      <div class="container">
+
+        <p class="text-muted" style="margin: 5px; padding: 5px;">
+
+		 ОРСИС НГУЭУ, 2014-2020. v3.2.10. Техническая поддержка: <a href="mailto:support@nsuem.ru">support@nsuem.ru</a>, &nbsp<span></span><br />
+			<span style="font-size:60%;text-align:right;">Последнее обновление:
+			Сессия: 2018-10-02 00:15:07 (auto), Семестр: 2018-10-02 00:10:18 (auto), 
+			<a href='/ver'>Platform last update at 10.03.2020</a>			</span>
+
+		</p>
+	  </div>
+
+    </div>
+	<div id="modal-outer-info" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+                    Информация
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">
+					<div class="panel panel-info" id="info-panel">
+						<div class="panel-heading" id="outer-info-header"></div>
+						<div class="panel-body" id="outer-info-message"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	</body>
+</html>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();
+   for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+   k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(101239448, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true,
+        webvisor:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/101239448" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->

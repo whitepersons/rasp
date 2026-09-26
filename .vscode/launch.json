@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Открыть index.html в Chrome",
+            "file": "${workspaceFolder}/index.html",
+            "webRoot": "${workspaceFolder}",
+            "runtimeArgs": [
+                "--allow-file-access-from-files",
+                "--disable-web-security"
+            ],
+            "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Запустить через Live Server (рекомендуется)",
+            "url": "http://localhost:5500/index.html",
+            "webRoot": "${workspaceFolder}",
+            "runtimeExecutable": "stable",
+            "runtimeArgs": [
+                "--new-window",
+                "--remote-debugging-port=9222"
+            ]
+        }
+    ]
+}
