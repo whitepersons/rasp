@@ -1,0 +1,26 @@
+{
+  "dependencies": {
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/ios": "^8.5.2"
+  },
+  "name": "nsuem-ios",
+  "version": "1.0.0",
+  "description": "Минималистичный автономный фронтенд для просмотра учебного расписания Новосибирского государственного университета экономики и управления (НГУЭУ). Сайт автоматически забирает данные с официального сервера вуза, фильтрует их и выводит в удобном виде.",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/whitepersons/rasp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/whitepersons/rasp/issues"
+  },
+  "homepage": "https://github.com/whitepersons/rasp#readme"
+}
