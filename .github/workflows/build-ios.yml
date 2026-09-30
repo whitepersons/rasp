@@ -26,7 +26,7 @@ jobs:
         run: |
           cd ios/App
           xcodebuild clean build \
-            -workspace App.xcworkspace \
+            -project App.xcodeproj \
             -scheme App \
             -configuration Release \
             -destination "generic/platform=iOS" \
