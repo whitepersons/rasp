@@ -300,3 +300,8 @@ window.addEventListener('DOMContentLoaded', () => {
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
 }
+
+.scroll-container {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* Плавный инерционный скролл */
+}

@@ -83,77 +83,8 @@
     }
   </style>
 
-  <!-- Тело баннера -->
-  <div class="responsive-banner">
-    <!-- Текст сообщения -->
-    <div class="banner-text-block" style="display: flex; flex-direction: row; align-items: center; gap: 15px; flex: 1;">
-      <span style="font-size: 20px; flex-shrink: 0;">🚨</span>
-      <div style="display: flex; flex-direction: column; gap: 2px;">
-        <span style="font-size: 13px; line-height: 1.4; font-weight: 600; text-align: left;">
-          Внимание: Из-за блокировки хостинга Vercel этот сайт больше не открывается в РФ без VPN.
-        </span>
-        <span style="font-size: 12px; line-height: 1.4; color: rgba(255, 255, 255, 0.85); text-align: left;">
-          Чтобы проект продолжал стабильную работу на независимом домене, вы можете поддержать автора.
-        </span>
-      </div>
-    </div>
-    
-    <!-- Кнопки управления -->
-    <div class="banner-controls" style="display: flex; align-items: center; gap: 14px; flex-shrink: 0;">
-      <!-- Кнопка доната -->
-      <a href="https://pay.cloudtips.ru/p/9f8fb4a3" target="_blank" rel="noopener noreferrer" 
-         style="
-           display: inline-flex;
-           align-items: center;
-           justify-content: center;
-           background-color: #ffffff;
-           color: #e03131;
-           text-decoration: none;
-           padding: 0 18px;
-           height: 36px;
-           border-radius: 10px;
-           font-size: 12px;
-           font-weight: 700;
-           white-space: nowrap;
-           box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-           transition: opacity 0.2s, transform 0.1s;
-           box-sizing: border-box;
-         "
-         onmouseover="this.style.opacity='0.95'"
-         onmouseout="this.style.opacity='1'"
-         onmousedown="this.style.transform='scale(0.97)'"
-         onmouseup="this.style.transform='scale(1)'">
-        ☕ Поддержать работу в России
-      </a>
 
-      <!-- Кнопка закрытия -->
-      <button 
-        onclick="document.getElementById('welcome-overlay').style.display='none'" 
-        style="
-          background: rgba(255, 255, 255, 0.12);
-          border: none;
-          color: #ffffff;
-          font-size: 18px;
-          cursor: pointer;
-          width: 28px;
-          height: 28px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 50%;
-          padding: 0;
-          margin: 0;
-          flex-shrink: 0;
-          transition: background 0.2s;
-          box-sizing: border-box;
-          line-height: 1;
-        "
-        onmouseover="this.style.background='rgba(255, 255, 255, 0.25)'"
-        onmouseout="this.style.background='rgba(255, 255, 255, 0.12)'"
-      >×</button>
     </div>
-  </div>
-</div>
 
 
     <header class="liquid-glass-header">
@@ -199,10 +130,6 @@
     </a>
     </nav>
 
-    <div id="pwa-popup">
-        <p class="pwa-title">Установить приложение</p>
-        <p class="pwa-desc">Нажми «Поделиться» <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> и выбери<br>«На экран Домой»</p>
-    </div>
 
 </body>
 </html>
