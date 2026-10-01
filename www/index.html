@@ -3,93 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <!-- Стандартный мета-тег для подавления ворнинга в Chrome/Chromium -->
-    <meta name="mobile-web-app-capable" content="yes">
-
-    <!-- Apple-специфичный тег (для совместимости со старыми версиями iOS Safari) -->
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+
     <title>Расписание 9-ИС403</title>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2225%22 fill=%22%230b021a%22/><text x=%2250%22 y=%2270%22 font-size=%2260%22 font-weight=%22bold%22 text-anchor=%22middle%22 fill=%22%23ffffff%22 font-family=%22sans-serif%22>N</text></svg>">
     <link rel="manifest" href="/site.webmanifest">
     
     <link rel="stylesheet" href="style.css">
-    
-    <script>
-        const savedTheme = localStorage.getItem('schedule_app_theme');
-        if (savedTheme) {
-            const theme = JSON.parse(savedTheme);
-            if (theme !== 'auto') document.documentElement.setAttribute('data-theme', theme);
-        }
-    </script>
     <script src="script.js" defer></script>
 </head>
 <body>
 
-    <div id="welcome-overlay" style="
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 24px 20px 0 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  position: relative;
-  z-index: 99999;
-">
-  <!-- Стили для адаптивности (плоский на ПК, плашка на мобилках) -->
-  <style>
-    .responsive-banner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-      max-width: 650px;
-      background: linear-gradient(135deg, #c92a2a 0%, #e03131 100%);
-      color: #ffffff;
-      padding: 14px 20px;
-      box-sizing: border-box;
-    }
-    
-    /* Десктопный вид — плоская плашка без скруглений и теней под дизайн */
-    @media (min-width: 769px) {
-      .responsive-banner {
-        border-radius: 0px;
-        border-bottom: 2px solid rgba(0, 0, 0, 0.15);
-      }
-    }
-
-    /* Мобильный вид — скругленная карточка */
-    @media (max-width: 768px) {
-      .responsive-banner {
-        flex-direction: column;
-        max-width: 450px;
-        border-radius: 14px;
-        padding: 20px;
-        gap: 16px;
-        box-shadow: 0 8px 24px rgba(224, 49, 49, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
-      .banner-text-block {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
-      }
-      .banner-controls {
-        width: 100%;
-        justify-content: space-between;
-      }
-    }
-  </style>
-
-
-    </div>
-
-
     <header class="liquid-glass-header">
         <div class="header-content">
-            <h1>Расписание <span>9-ИС403</span></h1>
+            <h1>Расписание <span class="group-badge">9-ИС403</span></h1>
             <div class="segmented-control" id="weekControl">
                 <button class="segment" data-week="auto">Авто</button>
                 <button class="segment" data-week="1">1 Нед.</button>
@@ -102,7 +36,6 @@
         </div>
     </header>
 
-    <!-- Добавлен класс для анимаций (fade) -->
     <main class="cards-container" id="cardsContainer">
         <div class="skeleton-card"></div>
         <div class="skeleton-card"></div>
@@ -112,24 +45,34 @@
         Обновлено <span id="updateTime">только что</span>
     </div>
 
-    <!-- Лаконичный и симметричный док -->
+    <!-- Нативный iOS Таб Бар -->
     <nav class="liquid-tab-bar">
         <button class="tab-btn js-today-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M9 16l2 2 4-4"></path></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+                <path d="M9 16l2 2 4-4"></path>
+            </svg>
             <span>Сегодня</span>
         </button>
         
         <a href="https://nsuem.vercel.app/" class="tab-btn" target="_blank" style="text-decoration: none;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="7" height="7"></rect>
-            <rect x="14" y="3" width="7" height="7"></rect>
-            <rect x="14" y="14" width="7" height="7"></rect>
-            <rect x="3" y="14" width="7" height="7"></rect>
-        </svg>
-        <span>Сервисы</span>
-    </a>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+            </svg>
+            <span>Сервисы</span>
+        </a>
     </nav>
 
+    <div id="pwa-popup">
+        <div class="pwa-title">Добавить на экран «Домой»</div>
+        <div class="pwa-desc">Нажмите «Поделиться» и выберите «На экран „Домой“» для быстрых заходов</div>
+    </div>
 
 </body>
 </html>

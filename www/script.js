@@ -90,7 +90,6 @@ class ScheduleApp {
         this.baseUrl = 'https://rasps.nsuem.ru/group/9-%D0%98%D0%A1403/';
         this.subgroup = Store.get('subgroup', '1');
         this.week = Store.get('week', 'auto');
-        this.theme = Store.get('theme', 'auto');
         this.cachedData = Store.get('cachedData', null);
         
         this.initUI();
@@ -286,6 +285,7 @@ function showPwaPopupOnce() {
 
     setTimeout(() => {
         const popup = document.getElementById('pwa-popup');
+        if (!popup) return;
         popup.classList.add('show');
         localStorage.setItem('pwa_popup_shown', 'true');
         setTimeout(() => popup.classList.remove('show'), 5000);
@@ -299,9 +299,4 @@ window.addEventListener('DOMContentLoaded', () => {
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
-}
-
-.scroll-container {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch; /* Плавный инерционный скролл */
 }
